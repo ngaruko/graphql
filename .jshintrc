@@ -1,6 +1,6 @@
 {
 	"node": true,
-	"esversion": 6,
+	"esversion": 9,
 	"asi": false,
 	"laxbreak": true,
 	"bitwise": true,

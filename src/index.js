@@ -6,8 +6,8 @@ import uuidv4 from 'uuid/v4';
 // Demo user data
 const users = [{
     id: '1',
-    name: 'Andrew',
-    email: 'andrew@example.com',
+    name: 'Bede',
+    email: 'bede@example.com',
     age: 27
 }, {
     id: '2',
@@ -155,9 +155,7 @@ const resolvers = {
             
             const user = {
                 id: uuidv4(),
-                name: args.name,
-                email: args.email,
-                age: args.age
+                ...args
             };
 
             users.push(user);
@@ -173,10 +171,7 @@ const resolvers = {
 
             const post = {
                 id: uuidv4(),
-                title: args.title,
-                body: args.body,
-                published: args.published,
-                author: args.author
+                ...args
             };
 
             posts.push(post);
@@ -193,9 +188,7 @@ const resolvers = {
 
             const comment = {
                 id: uuidv4(),
-                text: args.text,
-                author: args.author,
-                post: args.post
+                ...args
             };
 
             comments.push(comment);
