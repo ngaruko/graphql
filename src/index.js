@@ -225,6 +225,20 @@ const resolvers = {
 
             return post;
         },
+
+        deletePost(parent, args, ctx, info) { //jshint ignore:line
+            const postIndex = posts.findIndex((post) => post.id === args.id);
+
+            if (postIndex === -1) {
+                //no user found
+                throw new Error('Post not found');
+            }
+            const deletedPosts = posts.splice(postIndex, 1);
+            //deleted related comments 
+            comments = comments.filter((comment) => comment.post !== args.id);
+            return deletedPosts[0];
+        },
+
         createComment(parent, args, ctx, info) { //jshint ignore:line
             const userExists = users.some((user) => user.id === args.data.author);
             const postExists = posts.some((post) => post.id === args.data.post && post.published);
@@ -241,7 +255,17 @@ const resolvers = {
             comments.push(comment);
 
             return comment;
-        }
+        },
+
+        deleteComment(parent, args, ctx, info) { //jshint ignore:line
+            const commentIndex = comments.findIndex((comment) => comment.id === args.id);
+            //no need to delete related data
+            if (commentIndex === -1) {
+                //no user found
+                throw new Error('Comment not found');
+            }
+            return comments.splice(commentIndex, 1)[0];
+        },
     },
     Post: {
         author(parent, args, ctx, info) { //jshint ignore:line
