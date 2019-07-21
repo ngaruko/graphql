@@ -4,7 +4,7 @@ import uuidv4 from 'uuid/v4';
 // Scalar types - String, Boolean, Int, Float, ID
 
 // Demo user data
-const users = [{
+let users = [{
     id: '1',
     name: 'Bede',
     email: 'bede@example.com',
@@ -19,7 +19,7 @@ const users = [{
     email: 'mike@example.com'
 }];
 
-const posts = [{
+let posts = [{
     id: '10',
     title: 'GraphQL 101',
     body: 'This is how to use GraphQL...',
@@ -39,7 +39,7 @@ const posts = [{
     author: '2'
 }];
 
-const comments = [{
+let comments = [{
     id: '102',
     text: 'This worked well for me. Thanks!',
     author: '3',
@@ -72,9 +72,32 @@ const typeDefs = `
     }
 
     type Mutation {
-        createUser(name: String!, email: String!, age: Int): User!
-        createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!
-        createComment(text: String!, author: ID!, post: ID!): Comment!
+        createUser(data:createUserInput): User!
+        createPost(data:createPostInput): Post!
+        createComment(data:createCommentInput): Comment!
+
+        deleteUser(id:ID!): User!
+        deletePost(id:ID!): Post!
+        deleteComment(id:ID!): Comment!
+    }
+
+    input createUserInput{
+        name: String!
+        email: String!
+        age: Int
+    }
+
+    input createPostInput{
+        title: String!
+        body: String!
+        published: Boolean!
+        author: ID!
+    }
+
+    input createCommentInput{
+       text: String!
+        author: ID!
+        post: ID!
     }
 
     type User {
@@ -147,7 +170,7 @@ const resolvers = {
     },
     Mutation: {
         createUser(parent, args, ctx, info) { //jshint ignore:line
-            const emailTaken = users.some((user) => user.email === args.email);
+            const emailTaken = users.some((user) => user.email === args.data.email);
 
             if (emailTaken) {
                 throw new Error('Email taken');
@@ -155,15 +178,39 @@ const resolvers = {
             
             const user = {
                 id: uuidv4(),
-                ...args
+                ...args.data
             };
 
             users.push(user);
 
             return user;
         },
+        deleteUser(parent, args, ctx, info) { //jshint ignore:line
+            const userIndex = users.findIndex((user) => user.id === args.id);
+
+            if (userIndex === -1) {
+                //no user found
+                throw new Error('User not found');
+            }
+            const deletedUsers = users.splice(userIndex, 1);
+            //deleted related paost and comments 
+            posts = posts.filter((post) => {
+                //no matched posts
+                const match = post.author === args.id;
+                //delete all comments on posts
+                if (match) {
+                    comments = comments.filter((comment) => comment.post !== post.id);
+                }
+                return !match;
+
+            });
+            //delete all comments from users
+            comments = comments.filter((comment) => comment.author !== args.author);
+            return deletedUsers[0];
+        },
+
         createPost(parent, args, ctx, info) { //jshint ignore:line
-            const userExists = users.some((user) => user.id === args.author);
+            const userExists = users.some((user) => user.id === args.data.author);
 
             if (!userExists) {
                 throw new Error('User not found');
@@ -171,7 +218,7 @@ const resolvers = {
 
             const post = {
                 id: uuidv4(),
-                ...args
+                ...args.data
             };
 
             posts.push(post);
@@ -179,8 +226,8 @@ const resolvers = {
             return post;
         },
         createComment(parent, args, ctx, info) { //jshint ignore:line
-            const userExists = users.some((user) => user.id === args.author);
-            const postExists = posts.some((post) => post.id === args.post && post.published);
+            const userExists = users.some((user) => user.id === args.data.author);
+            const postExists = posts.some((post) => post.id === args.data.post && post.published);
 
             if (!userExists || !postExists) {
                 throw new Error('Unable to find user and post');
@@ -188,7 +235,7 @@ const resolvers = {
 
             const comment = {
                 id: uuidv4(),
-                ...args
+                ...args.data
             };
 
             comments.push(comment);
