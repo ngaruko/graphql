@@ -7,6 +7,8 @@ import User from './resolvers/User';
 import Post from './resolvers/Post';
 import Comment from './resolvers/Comment';
 
+const port = process.env.PORT || 4000;
+
 const server = new GraphQLServer({
     typeDefs: './src/schema.graphql',
     resolvers: {
@@ -22,5 +24,5 @@ const server = new GraphQLServer({
 });
 
 server.start(() => {
-    console.log('The server is up!');
+    console.log(`The server is up and running on port ${port}!`);
 });

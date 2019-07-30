@@ -18,6 +18,7 @@ const Mutation = {
 
 		return user;
 	},
+	//delete user
 	deleteUser(parent, args, {
 		db
 	}, info) { //jshint ignore:line
@@ -44,6 +45,36 @@ const Mutation = {
 		return deletedUsers[0];
 	},
 
+	//updates
+	updateUser(parent, args, {
+		db
+	}, info) { //jshint ignore:line
+		const {
+			id,
+			data
+		} = args;
+		const user = db.users.find((user) => user.id === id);
+		if (!user) {
+			throw new Error(`User with Id ${id} not found`);
+		}
+		if (typeof data.email === 'string') {
+			const emailTaken = db.users.some((user) => user.email === args.data.email);
+
+			if (emailTaken) {
+				throw new Error(`Email taken: ${data.email}. Please choose an other email`);
+			}
+		}
+		if (typeof data.name === 'string') {
+			user.name = data.name;
+		}
+
+		if (typeof data.age !== 'undefined') {
+			user.age = data.age;
+		}
+
+		return user;
+	},
+
 	createPost(parent, args, {
 		db
 	}, info) { //jshint ignore:line
@@ -63,9 +94,29 @@ const Mutation = {
 		return post;
 	},
 
-	deletePost(parent, args, {
-		db
-	}, info) { //jshint ignore:line
+	updatePost(parent, args, {db}, info) { //jshint ignore:line
+		const {	id,	data} = args;
+		const post = db.posts.find((post) => post.id === id);
+		if (!post) {
+			throw new Error(`Post with Id ${id} not found`);
+		}
+		if (typeof data.title === 'string') {
+			post.title = data.title;
+			
+		}
+		if (typeof data.body === 'string') {
+			post.body = data.body;
+		}
+
+		if (typeof data.published === 'boolean') {
+			post.published = data.published;
+		}
+		
+
+		return post;
+	},
+
+	deletePost(parent, args, {db}, info) { //jshint ignore:line
 		const postIndex = db.posts.findIndex((post) => post.id === args.id);
 
 		if (postIndex === -1) {
@@ -111,4 +162,7 @@ const Mutation = {
 	},
 };
 
-export { Mutation as default };
+export {
+	Mutation as
+	default
+};
