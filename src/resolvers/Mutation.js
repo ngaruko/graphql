@@ -129,9 +129,7 @@ const Mutation = {
 		return deletedPosts[0];
 	},
 
-	createComment(parent, args, {
-		db
-	}, info) { //jshint ignore:line
+	createComment(parent, args, {pubSub, db	}, info) { //jshint ignore:line
 		const userExists = db.users.some((user) => user.id === args.data.author);
 		const postExists = db.posts.some((post) => post.id === args.data.post && post.published);
 
@@ -145,10 +143,28 @@ const Mutation = {
 		};
 
 		db.comments.push(comment);
+		// publish subscription
+			pubSub.publish(`comment ${args.data.post}`, {	comment});
 
 		return comment;
 	},
 
+	//update comment
+	updateComment(parent, args, {db}, info) { //jshint ignore:line
+		const {id,data} = args;
+		const comment = db.comments.find((comment) => comment.id === id);
+		if (!comment) {
+			throw new Error(`Comment with Id ${id} not found`);
+		}
+		
+		if (typeof data.text === 'string') {
+			comment.text = data.text;
+		}
+
+		return comment;
+	},
+
+// delete comment
 	deleteComment(parent, args, {
 		db
 	}, info) { //jshint ignore:line
