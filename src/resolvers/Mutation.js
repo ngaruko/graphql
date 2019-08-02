@@ -75,9 +75,7 @@ const Mutation = {
 		return user;
 	},
 
-	createPost(parent, args, {
-		db
-	}, info) { //jshint ignore:line
+	createPost(parent, args, { pubSub, db }, info) { //jshint ignore:line
 		const userExists = db.users.some((user) => user.id === args.data.author);
 
 		if (!userExists) {
@@ -90,6 +88,10 @@ const Mutation = {
 		};
 
 		db.posts.push(post);
+		// publish subscription
+		if (post.published === true) { 
+		pubSub.publish(`post`, { post });
+	}
 
 		return post;
 	},
@@ -165,9 +167,7 @@ const Mutation = {
 	},
 
 // delete comment
-	deleteComment(parent, args, {
-		db
-	}, info) { //jshint ignore:line
+	deleteComment(parent, args, {db}, info) { //jshint ignore:line
 		const commentIndex = db.comments.findIndex((comment) => comment.id === args.id);
 		//no need to delete related data
 		if (commentIndex === -1) {

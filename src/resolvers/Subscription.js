@@ -1,20 +1,4 @@
 const Subscrition = {
-	count: {
-		subscribe(parent, args,{pubSub}, info) {//jshint ignore:line
-			let count = 0;
-			setInterval(() => {
-				count++;
-				pubSub.publish('count', {
-					count
-				});
-				
-			}, 1000);
-
-			return pubSub.asyncIterator('count');
-
-		}
-
-	},
 
 	comment: {
 		subscribe(parent, {postId}, {pubSub, db}, info) { //jshint ignore:line
@@ -25,6 +9,13 @@ const Subscrition = {
 
 			return pubSub.asyncIterator(`comment ${postId}`);
 
+		}
+	},
+
+	post: {
+		subscribe(parent, args, { pubSub }, info) { //jshint ignore:line
+		
+					return pubSub.asyncIterator(`post`);
 		}
 	}
 
