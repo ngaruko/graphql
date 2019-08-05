@@ -75,7 +75,10 @@ const Mutation = {
 		return user;
 	},
 
-	createPost(parent, args, { pubSub, db }, info) { //jshint ignore:line
+	createPost(parent, args, {
+		pubSub,
+		db
+	}, info) { //jshint ignore:line
 		const userExists = db.users.some((user) => user.id === args.data.author);
 
 		if (!userExists) {
@@ -89,22 +92,29 @@ const Mutation = {
 
 		db.posts.push(post);
 		// publish subscription
-		if (post.published === true) { 
-		pubSub.publish(`post`, { post });
-	}
+		if (post.published === true) {
+			pubSub.publish(`post`, {
+				post: {
+					mutation: 'CREATED',
+					data: post
+
+				}
+			});
+		}
 
 		return post;
 	},
 
-	updatePost(parent, args, {db}, info) { //jshint ignore:line
-		const {	id,	data} = args;
+	updatePost(parent, args, {db, pubSub}, info) { //jshint ignore:line
+		const {id,	data	} = args;
 		const post = db.posts.find((post) => post.id === id);
+		const originalPost = { ...post };
 		if (!post) {
 			throw new Error(`Post with Id ${id} not found`);
 		}
 		if (typeof data.title === 'string') {
 			post.title = data.title;
-			
+
 		}
 		if (typeof data.body === 'string') {
 			post.body = data.body;
@@ -112,26 +122,67 @@ const Mutation = {
 
 		if (typeof data.published === 'boolean') {
 			post.published = data.published;
+			if (originalPost.published && !post.published) {
+				//deleted
+				pubSub.publish(`post`, {
+					post: {
+						mutation: 'DELETED',
+						data: originalPost
+					}
+				});
+			} else if (!originalPost.published && post.published) {
+				//created
+				pubSub.publish(`post`, {
+					post: {
+						mutation: 'CREATED',
+						data: post
+					}
+				});
+			}
+		} else if (post.published) {
+			//updated
+			pubSub.publish(`post`, {
+				post: {
+					mutation: 'UPDATED',
+					data: post
+				}
+			});
 		}
-		
+
 
 		return post;
 	},
 
-	deletePost(parent, args, {db}, info) { //jshint ignore:line
+	deletePost(parent, args, {
+		db,
+		pubSub
+	}, info) { //jshint ignore:line
 		const postIndex = db.posts.findIndex((post) => post.id === args.id);
 
 		if (postIndex === -1) {
 			//no user found
 			throw new Error('Post not found');
 		}
-		const deletedPosts = db.posts.splice(postIndex, 1);
+		const [post] = db.posts.splice(postIndex, 1);
 		//deleted related db.comments 
 		db.comments = db.comments.filter((comment) => comment.post !== args.id);
-		return deletedPosts[0];
+
+		// publish subscription
+		if (post.published === true) {
+			pubSub.publish(`post`, {
+				post: {
+					mutation: 'DELETED',
+					data: post
+				}
+			});
+		}
+		return post;
 	},
 
-	createComment(parent, args, {pubSub, db	}, info) { //jshint ignore:line
+	createComment(parent, args, {
+		pubSub,
+		db
+	}, info) { //jshint ignore:line
 		const userExists = db.users.some((user) => user.id === args.data.author);
 		const postExists = db.posts.some((post) => post.id === args.data.post && post.published);
 
@@ -146,19 +197,26 @@ const Mutation = {
 
 		db.comments.push(comment);
 		// publish subscription
-			pubSub.publish(`comment ${args.data.post}`, {	comment});
+		pubSub.publish(`comment ${args.data.post}`, {
+			comment
+		});
 
 		return comment;
 	},
 
 	//update comment
-	updateComment(parent, args, {db}, info) { //jshint ignore:line
-		const {id,data} = args;
+	updateComment(parent, args, {
+		db
+	}, info) { //jshint ignore:line
+		const {
+			id,
+			data
+		} = args;
 		const comment = db.comments.find((comment) => comment.id === id);
 		if (!comment) {
 			throw new Error(`Comment with Id ${id} not found`);
 		}
-		
+
 		if (typeof data.text === 'string') {
 			comment.text = data.text;
 		}
@@ -166,8 +224,10 @@ const Mutation = {
 		return comment;
 	},
 
-// delete comment
-	deleteComment(parent, args, {db}, info) { //jshint ignore:line
+	// delete comment
+	deleteComment(parent, args, {
+		db
+	}, info) { //jshint ignore:line
 		const commentIndex = db.comments.findIndex((comment) => comment.id === args.id);
 		//no need to delete related data
 		if (commentIndex === -1) {
