@@ -87,13 +87,10 @@ type Comment {
   post: Post!
 }
 
-//enums
-type MutationType {
+enum MutationType {
   CREATED
   DELETED
   UPDATED
-
-
 }
 
 
