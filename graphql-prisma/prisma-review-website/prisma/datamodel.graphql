@@ -9,7 +9,7 @@ type Book {
   id: ID! @id
   title: String!
   author: String!
-  isbn:ID!
+  isbn:String!
   reviewers: [User!] @relationship(name: "BookToUser", onDelete: SET_NULL)  
   reviews: [Review!] @relationship(name: "ReviewToBook", onDelete: CASCADE)
 }
@@ -18,6 +18,6 @@ type Review {
   id: ID! @id
   text: String
   rating: Int!
-  author: User! @relationship(name: "ReviewToUser", onDelete: SET_NULL)
+  reviewer: User! @relationship(name: "ReviewToUser", onDelete: SET_NULL)
   book: Book! @relationship(name: "ReviewToBook", onDelete: SET_NULL)
 }

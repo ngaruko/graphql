@@ -1,39 +1,37 @@
 const Query = {
-	users(parent, args, {
-		db
-	}, info) { //jshint ignore:line
-		if (!args.query) {
-			return db.users;
-		}
+	users(parent, args, {prisma	}, info) { //jshint ignore:line
+		return prisma.query.users(null,info);
+		// if (!args.query) {
+		// 	return db.users;
+		// }
 
-		return db.users.filter((user) => {
-			return user.name.toLowerCase().includes(args.query.toLowerCase());
-		});
+		// return db.users.filter((user) => {
+		// 	return user.name.toLowerCase().includes(args.query.toLowerCase());
+		// });
 	},
-	posts(parent, args, {
-		db
-	}, info) { //jshint ignore:line
-		if (!args.query) {
-			return db.posts;
-		}
+	posts(parent, args, {prisma}, info) { //jshint ignore:line
+		return prisma.query.posts(null, info);
+	// 	if (!args.query) {
+	// 		return db.posts;
+	// 	}
 
-		return db.posts.filter((post) => {
-			const isTitleMatch = post.title.toLowerCase().includes(args.query.toLowerCase());
-			const isBodyMatch = post.body.toLowerCase().includes(args.query.toLowerCase());
-			return isTitleMatch || isBodyMatch;
-		});
-	},
-	comments(parent, args, {
-		db
-	}, info) { //jshint ignore:line
-		return db.comments;
-	},
-	me() {
-		return {
-			id: '123098',
-			name: 'Mike',
-			email: 'mike@example.com'
-		};
+	// 	return db.posts.filter((post) => {
+	// 		const isTitleMatch = post.title.toLowerCase().includes(args.query.toLowerCase());
+	// 		const isBodyMatch = post.body.toLowerCase().includes(args.query.toLowerCase());
+	// 		return isTitleMatch || isBodyMatch;
+	// 	});
+	// },
+	// comments(parent, args, {
+	// 	db
+	// }, info) { //jshint ignore:line
+	// 	return db.comments;
+	// },
+	// me() {
+	// 	return {
+	// 		id: '123098',
+	// 		name: 'Mike',
+	// 		email: 'mike@example.com'
+	// 	};
 	},
 	post() {
 		return {

@@ -9,7 +9,7 @@ import Subscription from './resolvers/Subscription';
 import User from './resolvers/User';
 import Post from './resolvers/Post';
 import Comment from './resolvers/Comment';
-import '../prisma';
+import prisma from '../prisma';
 
 const port = process.env.PORT || 4000;
 
@@ -27,7 +27,8 @@ const server = new GraphQLServer({
     },
     context: {
         db,
-        pubSub
+        pubSub,
+        prisma
     }
 });
 

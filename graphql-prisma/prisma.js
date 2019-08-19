@@ -1,6 +1,6 @@
 import { Prisma } from "prisma-binding";
-import { log } from "util";
-import chalk from 'chalk';
+//import { log } from "util";
+//import chalk from 'chalk';
 
 
 const prisma = new Prisma({
@@ -8,6 +8,10 @@ const prisma = new Prisma({
   typeDefs: "src/generated/prisma.graphql",
   endpoint: "http://localhost:4466"
 });
+
+export { prisma as default };
+
+/*
 
 // //async
 // const createPostForUser = async (authorId, data) => {
@@ -107,3 +111,4 @@ updatePostForUser('cjz237u6j0009070777yw22y2', {published: false}).then((user) =
 // 		log(JSON.stringify(data, undefined, 2));
 
 // 	});
+*/
